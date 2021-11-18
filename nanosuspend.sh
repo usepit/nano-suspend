@@ -12,7 +12,6 @@
 
 #[Unit]
 #Description=Suspend script
-#After=pulseaudio
 #[Service]
 #Type=simple
 #ExecStart=/path/to/nanosuspend.sh
@@ -20,7 +19,7 @@
 #[Install]
 #WantedBy=multi-user.target
 
-#Ctrl-O, save, and update systemd with:
+#Ctrl-O, save, and run in the terminal:
 
 #chmod +x /path/to/nanosuspend.sh
 #systemctl daemon-reload
@@ -28,14 +27,14 @@
 #systemctl start nanosuspend.service
 
 # Time between each check
-sleepValue=5;
+sleepValue=9;
 
 # Idle seconds before suspending
 startAt=120;
 
-# Please open all the programs you normally have open, make sure no sounds are being played, and run this command:
+# Open all the programs you normally have open, make sure no sound is being played, run this command:
 #   pacmd list-sinks | grep -c 'state: RUNNING'
-# This will be your baseline of running sound processes.
+# and enter the value in the noSoundValue variable below.
 
 noSoundValue=0
 
@@ -63,14 +62,17 @@ while :; do
     #Detect waking from suspend to reset suspendState and internet
     if [ "$idleScreen" -lt "$sleepValue" ]; then
         suspendState=0;
-        systemctl enable NetworkManager.service
+        networkActive=$(systemctl status network-manager | grep -c dead);
+        if [ networkActive -eq 0 ]; then
+            systemctl enable network-manager;
+        fi
     fi
 
     #Suspend if idle
     if [[ "$idleSoundTimer" -gt "$startAt" && "$idleScreen" -gt "$startAt" && $suspendState -eq 0 ]]; then
         idleSoundTimer=0;
         suspendState=1;
-        systemctl disable NetworkManager.service
+        systemctl disable network-manager
         echo freeze > /sys/power/state
     fi;
 
