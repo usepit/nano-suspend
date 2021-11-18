@@ -1,0 +1,7 @@
+[Unit]
+Description=Suspend script
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/nanosuspend.sh
+[Install]
+WantedBy=multi-user.target
