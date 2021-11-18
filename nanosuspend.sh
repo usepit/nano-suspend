@@ -63,7 +63,7 @@ while :; do
     #Detect waking from suspend to reset suspendState and internet
     if [ "$idleScreen" -lt "$sleepValue" ]; then
         suspendState=0;
-        systemctl restart enable manager.service
+        systemctl enable NetworkManager.service
     fi
 
     #Suspend if idle
